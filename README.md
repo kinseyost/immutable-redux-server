@@ -1,2 +1,2 @@
 # immutable-redux-server
-server serving https://github.com/kinseyost/immutable-redux
+server serving [immutable-redux](https://github.com/kinseyost/immutable-redux).
