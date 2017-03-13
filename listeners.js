@@ -1,22 +1,21 @@
 import { UserModel } from './models.js';
 
-export function ADD_USER(action) {
+export async function ADD_USER(action) {
+
   const user = action.user;
   const newUser = new UserModel(user);
-  newUser.save((err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log('saved user', user);
-    }
-  });
+  try {
+    await newUser.save();
+  } catch (e) {
+    throw e;
+  }
   return action;
 }
 
 export async function FETCH_USERS(action) {
   await UserModel.find((err, allUsers) => {
     if (err) {
-      return console.error(err);
+      throw err;
     }
     action.users = allUsers;
   });
