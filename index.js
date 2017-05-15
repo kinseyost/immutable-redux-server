@@ -25,7 +25,15 @@ const sub = redis.createClient(redisPort, redisHost, redisConf);
 io.adapter(socketIoRedis({ pubClient: pub, subClient: sub }));
 
 io.on('connection', (socket) => {
-  console.log(colors.yellow('client connected'));
+  console.log('client connected', socket.id);
+
+  io.of('/').adapter.remoteJoin(socket.id, 'room1', function (err) {
+  if (err) { /* unknown id */ }
+    io.of('/').adapter.clients(function (err, clients) {
+      console.log(clients); // an array containing all connected socket ids
+    });
+  });
+
   socket.on('io', async function (action) {
     try {
       const modifiedAction = await listeners[action.type](action);

@@ -6,7 +6,6 @@ export async function ADD_USER(action) {
   const newUser = new UserModel(user);
   try {
     await newUser.save();
-    // TODO emit action across pub/sub channel to update list for all users.
   } catch (e) {
     throw e;
   }
