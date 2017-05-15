@@ -32,7 +32,17 @@ server.listen(port, () => {
   console.log(`listening on :${port}`);
 });
 
-mongoose.connect('mongodb://localhost/test');
+const connectToDb = () => {
+  try {
+    mongoose.connect('mongodb://localhost/test');
+  } catch (e) {
+    console.log(e);
+    setTimeout(1000, () => {
+      console.log('reconnecting');
+      connectToDb()
+    });
+  }
+}
 
 const db = mongoose.connection;
 db.on('error', (err) => {

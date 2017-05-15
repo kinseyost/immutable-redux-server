@@ -1,6 +1,14 @@
 FROM node:6
-WORKDIR /usr/src/app
-EXPOSE 3000
 
-COPY ./dockerInit.sh ./dockerInit.sh
-CMD [ "bash", "./dockerInit.sh" ]
+# Prepare app directory
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app/
+
+# Install dependencies
+COPY package.json /usr/src/app/
+RUN yarn
+
+ADD . /usr/src/app/
+
+EXPOSE 8081
+CMD [ "yarn", "start" ]
