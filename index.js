@@ -8,6 +8,8 @@ import colors from 'colors';
 
 import * as listeners from './listeners.js';
 
+mongoose.Promise = global.Promise;
+
 const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
@@ -32,24 +34,23 @@ server.listen(port, () => {
   console.log(`listening on :${port}`);
 });
 
-const connectToDb = () => {
-  try {
-    mongoose.connect('mongodb://localhost/test');
-  } catch (e) {
-    console.log(e);
-    setTimeout(1000, () => {
-      console.log('reconnecting');
-      connectToDb()
-    });
-  }
+/* If running in docker use the container name, otherwise, localhost */
+const url = process.env.DOCKER_DB ? 'mongo:27017' : 'localhost/test';
+connectToDb();
+
+function connectToDb() {
+  mongoose.connect(`mongodb://${url}`);
 }
 
 const db = mongoose.connection;
 db.on('error', (err) => {
   console.error.bind(console, 'connection error:');
   server.close(function() {
-    console.log(colors.red("Failure to connect to mongodb, Shutting down"));
-    process.exit();
+    console.log(err);
+    setTimeout(() => {
+      console.log('reconnecting');
+      connectToDb()
+    }, 1000);
   });
 });
 db.once('open', () => {
