@@ -5,17 +5,24 @@ import http from 'http';
 import socketIO from 'socket.io';
 import mongoose from 'mongoose';
 import colors from 'colors';
+import socketIoRedis from 'socket.io-redis';
+import redis from 'redis';
 
 import * as listeners from './listeners.js';
 
-mongoose.Promise = global.Promise;
+const isRunningInDocker = process.env.DOCKER_DB;
 
 const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
 const port = 8081;
+const redisHost = isRunningInDocker ? 'redis' : 'localhost';
+const redisPort = 6379;
 
-// TODO store and retreive user data from mongo
+const redisConf = { auth_pass: '', return_buffers: true };
+const pub = redis.createClient(redisPort, redisHost, redisConf);
+const sub = redis.createClient(redisPort, redisHost, redisConf);
+io.adapter(socketIoRedis({ pubClient: pub, subClient: sub }));
 
 io.on('connection', (socket) => {
   console.log(colors.yellow('client connected'));
@@ -35,7 +42,7 @@ server.listen(port, () => {
 });
 
 /* If running in docker use the container name, otherwise, localhost */
-const url = process.env.DOCKER_DB ? 'mongo:27017' : 'localhost/test';
+const url = isRunningInDocker ? 'mongo:27017' : 'localhost/test';
 connectToDb();
 
 function connectToDb() {
