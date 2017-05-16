@@ -6,7 +6,6 @@ import socketIO from 'socket.io';
 import mongoose from 'mongoose';
 import colors from 'colors';
 import socketIoRedis from 'socket.io-redis';
-import redis from 'redis';
 
 import * as listeners from './listeners.js';
 
@@ -16,24 +15,14 @@ const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
 const port = 8081;
-const redisHost = isRunningInDocker ? 'redis' : 'localhost';
-const redisPort = 6379;
+const host = isRunningInDocker ? 'redis' : 'localhost';
 
-const redisConf = { auth_pass: '', return_buffers: true };
-const pub = redis.createClient(redisPort, redisHost, redisConf);
-const sub = redis.createClient(redisPort, redisHost, redisConf);
-io.adapter(socketIoRedis({ pubClient: pub, subClient: sub }));
+io.adapter(socketIoRedis({ host, port: 6379 }));
 
 io.on('connection', (socket) => {
   console.log('client connected', socket.id);
-
-  io.of('/').adapter.remoteJoin(socket.id, 'room1', function (err) {
-  if (err) { /* unknown id */ }
-    io.of('/').adapter.clients(function (err, clients) {
-      console.log(clients); // an array containing all connected socket ids
-    });
-  });
-
+  socket.join('room1');
+  listeners.initIO(io); // store instance of io in listeners module
   socket.on('io', async function (action) {
     try {
       const modifiedAction = await listeners[action.type](action);
