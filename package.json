@@ -4,6 +4,7 @@
   "description": "A server for a playground for working with react, redux, and immutablejs",
   "scripts": {
     "start": "nodemon ./src/index.js --exec babel-node --presets es2015,stage-2",
+    "debug": "nodemon ./src/index.js --exec babel-node --presets es2015,stage-2 --debug=5858",
     "lint": "./node_modules/.bin/eslint src --max-warnings 0"
   },
   "repository": {

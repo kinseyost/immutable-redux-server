@@ -22,7 +22,11 @@ export async function ADD_USER(action) {
 async function broadcastUsers() {
   const users = await FETCH_USERS();
   console.log('sending users to room');
-  io.to('room1').emit('message', users);
+  try {
+    io.to('room1').emit('message', users);
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 export async function FETCH_USERS(action = { type: 'FETCH_USERS'}) {

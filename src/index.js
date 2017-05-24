@@ -24,6 +24,7 @@ io.on('connection', (socket) => {
   socket.join('room1');
   listeners.initIO(io); // store instance of io in listeners module
   socket.on('io', async function (action) {
+    console.log('received message', action);
     try {
       const modifiedAction = await listeners[action.type](action);
       socket.emit('io', modifiedAction);
