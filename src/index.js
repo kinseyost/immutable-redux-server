@@ -16,15 +16,21 @@ const server = http.Server(app);
 const io = socketIO(server);
 const port = 8081;
 const host = isRunningInDocker ? 'redis' : 'localhost';
+let shouldConnect = 0;
 
 io.adapter(socketIoRedis({ host, port: 6379 }));
 
 io.on('connection', (socket) => {
   console.log('client connected', socket.id);
-  socket.join('room1');
+  if (shouldConnect % 2 === 0) {
+    socket.join('room1');
+  }
+  shouldConnect += 1;
   listeners.initIO(io); // store instance of io in listeners module
+  socket.on('emit', (event) => {
+    console.log('received message', event);
+  })
   socket.on('io', async function (action) {
-    console.log('received message', action);
     try {
       const modifiedAction = await listeners[action.type](action);
       socket.emit('io', modifiedAction);
